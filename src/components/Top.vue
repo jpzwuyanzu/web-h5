@@ -1,132 +1,155 @@
 <script setup lang="ts">
-import { useTestStore } from "../store/modules/test";
-import { storeToRefs } from "pinia";
-import { provide } from "vue";
 import { ref, reactive } from "vue";
-import Pagination from "./Pagination.vue";
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from "vue-router";
 
-const currentPage = ref(1);
-const totalPages = 8;
-const show = ref(false);
-const searchBox = ref(false);
+interface Detail {
+  label: string;
+  selected?: boolean; // 可选属性
+}
+
+interface Item {
+  label: string;
+  expanded: boolean;
+  details: Detail[];
+}
+
+const currentPage = ref<number>(1);
+const show = ref<boolean>(false);
+const showSearchBox = ref<boolean>(false);
 const router = useRouter();
-const items = reactive([
-  { label: "中文 1", expanded: false, 
+const items = reactive<Item[]>([
+  {
+    label: "中文 1",
+    expanded: false,
     details: [
       {
-        label:'ENG',selected: false
+        label: "ENG",
+        selected: false,
       },
       {
-        label:'JAN',selected: false
+        label: "JAN",
+        selected: false,
       },
       {
-        label:'ZH',selected: false
+        label: "ZH",
+        selected: false,
       },
-    ]
+    ],
   },
-  { label: "中文 2", expanded: false, 
+  {
+    label: "中文 2",
+    expanded: false,
     details: [
-    {
-        label:'ENG',selected: false
+      {
+        label: "ENG",
+        selected: false,
       },
       {
-        label:'JAN',selected: false
+        label: "JAN",
+        selected: false,
       },
       {
-        label:'ZH',selected: false
+        label: "ZH",
+        selected: false,
       },
-    ]
+    ],
   },
-  { label: "中文 3", expanded: false,
+  {
+    label: "中文 3",
+    expanded: false,
     details: [
-    {
-        label:'ENG',selected: false
+      {
+        label: "ENG",
+        selected: false,
       },
       {
-        label:'JAN',selected: false
+        label: "JAN",
+        selected: false,
       },
       {
-        label:'ZH',selected: false
+        label: "ZH",
+        selected: false,
       },
-    ]
+    ],
   },
-  { label: "中文 4", expanded: false,
+  {
+    label: "中文 4",
+    expanded: false,
     details: [
       {
-        label:'ENG'
+        label: "ENG",
       },
       {
-        label:'JAN'
+        label: "JAN",
       },
       {
-        label:'ZH'
+        label: "ZH",
       },
-    ]
+    ],
   },
 ]);
 
 const showPopup = () => {
   show.value = !show.value;
+  if (show.value) {
+    items.forEach((item) => {
+      item.expanded = false;
+    });
+  }
 };
 
-const showSearchBox = () => {
-  searchBox.value = !searchBox.value
-}
+const switchShowSearchBox = () => {
+  showSearchBox.value = !showSearchBox.value;
+};
 
-const updateLabel = (item, newLabel) => {
-  item.details.forEach(detail => {
-    detail.selected = detail.label === newLabel; // 设置选中的状态
+const updateLabel = (item: Item, newLabel: string) => {
+  item.details.forEach((detail) => {
+    // 设置选中的状态
+    detail.selected = detail.label === newLabel;
   });
-  item.label = newLabel; // 更新 item.label
+  // 更新 item.label
+  item.label = newLabel;
 };
 
-
-const toggleExpand = (index) => {
+const toggleExpand = (index: number) => {
   items[index].expanded = !items[index].expanded;
 };
 
-const handlePageChange = (page: number) => {
-  console.log("当前页码：", page);
-  currentPage.value = page;
-};
-
-const open = (item)=>{
+const linkHome = () => {
   router.push({
-    path: '/',
+    path: "/",
   });
-}
-
-const testStore = useTestStore();
-const { count } = storeToRefs(testStore);
-
-testStore.setDoubleCount(100);
+};
 </script>
 
 <template>
   <div class="layoutCongtainer">
-    <!-- 开启顶部安全区适配 -->
-    <!-- <van-nav-bar safe-area-inset-top title="test 页面" /> -->
     <div class="top">
       <div class="left" @click="showPopup">
         <img src="@/assets/left.png" alt="" />
       </div>
-      <div class="middle" @click="open">
+      <div class="middle" @click="linkHome">
         <img src="@/assets/logo.png" alt="" />
       </div>
-      <div class="left" @click="showSearchBox" >
+      <div class="left" @click="switchShowSearchBox">
         <img src="@/assets/search.png" alt="" />
       </div>
     </div>
 
-    <div class="search-box" v-if="searchBox">
-      <div>
-        <input type="text" class="search-input" placeholder="请输入您要搜索的内容">
-        <div class="button">
-          <img src="@/assets/big-search.png" alt="" />
+    <transition name="fade">
+      <div class="search-box" v-if="showSearchBox">
+        <div>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="请输入您要搜索的内容"
+          />
+          <div class="button">
+            <img src="@/assets/big-search.png" alt="" />
+          </div>
         </div>
       </div>
-    </div>
+    </transition>
 
     <div class="top-content">
       <van-popup
@@ -137,18 +160,25 @@ testStore.setDoubleCount(100);
       >
         <div class="popup-ul">
           <div class="popup-li" v-for="(item, index) in items" :key="index">
-            <div class="content"  @click="toggleExpand(index)">
+            <div class="content" @click="toggleExpand(index)">
               <div>
                 {{ item.label }}
               </div>
               <div class="down">
-                <img src="@/assets/down.png" alt="" />
+                <img v-if="item.expanded" src="@/assets/up.png" alt="" />
+                <img v-else="item.expanded" src="@/assets/down.png" alt="" />
               </div>
             </div>
             <!-- 展开内容 -->
             <div class="details" v-if="item.expanded">
-              <div v-for="(i,index) in item.details" >
-                <div class="details-label" :class="{ selected: i.selected }" @click="updateLabel(item, i.label)">{{ i.label }}</div>
+              <div v-for="(i, index) in item.details">
+                <div
+                  class="details-label"
+                  :class="{ selected: i.selected }"
+                  @click="updateLabel(item, i.label)"
+                >
+                  {{ i.label }}
+                </div>
               </div>
             </div>
           </div>
@@ -220,7 +250,8 @@ testStore.setDoubleCount(100);
           display: flex;
           justify-content: space-between;
         }
-        .down {
+        .down,
+        .up {
           img {
             width: 11.5px;
             height: 6.5px;
@@ -270,5 +301,19 @@ testStore.setDoubleCount(100);
       height: 30px;
     }
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active 在 2.1.8+ */ {
+  opacity: 0;
+}
+.content {
+  padding: 20px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  margin-top: 10px;
 }
 </style>

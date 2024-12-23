@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { useTestStore } from "../store/modules/test";
-import { storeToRefs } from "pinia";
-import { provide } from "vue";
-import { ref, reactive } from "vue";
-import Pagination from "./Pagination.vue";
-import Top from "./Top.vue";
-import { useRouter, useRoute } from 'vue-router';
+import { ref } from "vue";
+import Pagination from "../components/Pagination.vue";
+import Top from "../components/Top.vue";
+import { useRouter } from "vue-router";
 
 const currentPage = ref(1);
 const totalPages = 8;
@@ -16,16 +13,11 @@ const handlePageChange = (page: number) => {
   currentPage.value = page;
 };
 
-const open = (item)=>{
+const open = (item) => {
   router.push({
-    path: '/detail',
+    path: "/detail",
   });
-}
-
-const testStore = useTestStore();
-const { count } = storeToRefs(testStore);
-
-testStore.setDoubleCount(100);
+};
 </script>
 
 <template>
@@ -33,12 +25,20 @@ testStore.setDoubleCount(100);
     <!-- 开启顶部安全区适配 -->
     <!-- <van-nav-bar safe-area-inset-top title="test 页面" /> -->
 
-    <Top/>
+    <Top />
 
     <div class="testContent">
       <div class="box">
-        <div class="small-box" v-for="(item, index) in 8" :key="index" @click="open(item)">
-          <div class="img"></div>
+        <div
+          class="small-box"
+          v-for="(item, index) in 8"
+          :key="index"
+          @click="open(item)"
+        >
+          <div class="preImg">
+            <div class="timeLine">2:52:38</div>
+            <div class="timeLine">2:52:38</div>
+          </div>
           <div class="title">
             チ恋チ粘着ピーピンピチ恋チ粘着ピーピンチ恋チ粘着ピーピンピ
           </div>
@@ -72,11 +72,32 @@ testStore.setDoubleCount(100);
     .small-box {
       width: calc(50% - 4.75px);
       height: 123px;
-      .img {
+      .preImg {
+        box-sizing: border-box;
         width: 100%;
         height: 97px;
         background-color: white;
         margin-bottom: 5px;
+        background: url("../assets/videoPre.png") no-repeat center center;
+        background-size: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: end;
+        padding: 0 4px 4px 4px;
+        .timeLine {
+          width: 44px;
+          height: 18px;
+          border-radius: 18px;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          font-size: 9px;
+          font-weight: 500;
+          color: #fff;
+        }
       }
       .title {
         font-size: 14px;

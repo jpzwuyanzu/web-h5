@@ -9,12 +9,7 @@
       上一页
     </button>
 
-    <button
-      class="pagination-item"
-      v-if="showLeftEllipsis"
-    >
-        ...
-    </button>
+    <button class="pagination-item" v-if="showLeftEllipsis">...</button>
 
     <!-- 页码按钮 -->
     <button
@@ -28,12 +23,7 @@
     </button>
 
     <!-- 省略号 -->
-    <button
-      class="pagination-item"
-      v-if="showRightEllipsis"
-    >
-        ...
-    </button>
+    <button class="pagination-item" v-if="showRightEllipsis">...</button>
 
     <!-- 下一页 -->
     <button
@@ -64,11 +54,13 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["pageChange"]);
+const emit = defineEmits<{
+  (e: "pageChange", page: number): void;
+}>();
 
 // 计算可见的页码
 const visiblePages = computed(() => {
-  const pages = [];
+  const pages: number[] = [];
   const half = Math.floor(props.maxVisiblePages / 2);
   let start = Math.max(1, props.currentPage - half);
   let end = Math.min(props.totalPages, props.currentPage + half);
@@ -90,25 +82,15 @@ const visiblePages = computed(() => {
     }
   }
 
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-
-  return pages;
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 });
-
 
 // 显示省略号
 const showLeftEllipsis = computed(() => {
-  // 显示左省略号的条件
-  return (
-    props.totalPages > props.maxVisiblePages &&
-    visiblePages.value[0] > 2
-  );
+  return props.totalPages > props.maxVisiblePages && visiblePages.value[0] > 2;
 });
 
 const showRightEllipsis = computed(() => {
-  // 显示右省略号的条件
   return (
     props.totalPages > props.maxVisiblePages &&
     visiblePages.value.at(-1) < props.totalPages - 1
@@ -116,7 +98,7 @@ const showRightEllipsis = computed(() => {
 });
 
 // 切换页码
-const goToPage = (page: number) => {
+const goToPage = (page: number): void => {
   if (page >= 1 && page <= props.totalPages) {
     emit("pageChange", page);
   }

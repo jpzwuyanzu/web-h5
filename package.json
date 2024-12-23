@@ -20,7 +20,8 @@
     "unplugin-vue-components": "^0.27.5",
     "vant": "^4.9.10",
     "vue": "^3.5.12",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "xgplayer": "^3.0.20"
   },
   "devDependencies": {
     "@types/postcss-pxtorem": "^6.1.0",
