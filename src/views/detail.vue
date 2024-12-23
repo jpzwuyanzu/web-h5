@@ -4,11 +4,13 @@
     <div class="testContent">
       <div class="title">
         <span style="vertical-align: top">
-          <span @click="open">首页</span> / 视频 /
+          <span @click="linkHome">首页</span> / 视频 /
         </span>
         <span style="color: #f10086; vertical-align: middle">视频详情</span>
       </div>
-      <div class="video"></div>
+      <div class="video">
+        <div id="videoContainer"></div>
+      </div>
       <div class="box">
         <div class="title-box">
           重磅网曝门上海某集团顶级名媛“李思涵”，被曝做性奴吃屌狂操白虎粉穴 A 片
@@ -24,7 +26,7 @@
             class="small-box"
             v-for="(item, index) in 5"
             :key="index"
-            @click="open(item)"
+            @click="playItem(item)"
           >
             <div class="preImg">
               <div class="timeLine">2:52:38</div>
@@ -41,17 +43,53 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from "vue";
 import Top from "../components/Top.vue";
 import { useRouter } from "vue-router";
+import Player, { PlayerConfig } from "xgplayer"; // 导入 PlayerConfig 类型
+import "xgplayer/dist/index.min.css";
 
 const router = useRouter();
+const xgPlayerRef = ref<PlayerConfig>(null);
 
-// 定义 open 函数的参数类型
-const open = (item: any): void => {
+const linkHome = (): void => {
   router.push({
     path: "/",
   });
 };
+
+const playItem = (item: any) => {
+  console.log("暂时没有资源，有资源之后在这里传入参数即可");
+  createNewPlayer();
+};
+
+// 定义 PlayerConfig 类型
+const config = ref<PlayerConfig>({
+  el: null, // 初始化为 null，稍后在 onMounted 中赋值
+  url: "//lf3-static.bytednsdoc.com/obj/eden-cn/nupenuvpxnuvo/xgplayer_doc/xgplayer-demo.mp4",
+  playsinline: true,
+  poster:
+    "//lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg",
+  plugins: [],
+  width: window.innerWidth,
+  height: "210px",
+});
+
+const createNewPlayer = () => {
+  xgPlayerRef.value && xgPlayerRef.value.destroy();
+  // 获取 DOM 元素并赋值给 el
+  config.value.el = document.getElementById("videoContainer") as HTMLElement; // 类型断言
+
+  xgPlayerRef.value = new Player(config.value); // 创建播放器实例
+};
+
+onMounted(() => {
+  createNewPlayer();
+  // 可选：在组件卸载时销毁播放器
+  return () => {
+    xgPlayerRef.value.destroy();
+  };
+});
 </script>
 
 <style scoped lang="less">
@@ -73,9 +111,13 @@ const open = (item: any): void => {
     background: white;
     width: 100%;
     height: 210px;
-    margin-bottom: 9px;
+    margin-bottom: 15px;
     background: url("../assets/videoPre.png") no-repeat center center;
     background-size: 100%;
+    .videoContainer {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   .box {
