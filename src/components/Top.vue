@@ -1,120 +1,132 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, computed } from "vue";
+import { storeToRefs } from "pinia";
+import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+import { useSideMenuStore } from "@/store/modules/sideMenu";
+import useTranslate from "@/hooks/TransLateKey";
 
 interface Detail {
   label: string;
+  aName?: string;
   selected?: boolean; // 可选属性
 }
 
 interface Item {
   label: string;
+  type: string;
   expanded: boolean;
   details: Detail[];
+  selectName?: string;
 }
-
-const currentPage = ref<number>(1);
-const show = ref<boolean>(false);
+const sideMenuStore = useSideMenuStore();
+const { languageSelect } = storeToRefs(sideMenuStore);
+const { t, locale } = useI18n();
+const { getTranslate } = useTranslate();
+const sideMenuVisible = ref<boolean>(false);
 const showSearchBox = ref<boolean>(false);
 const router = useRouter();
-const items = reactive<Item[]>([
+
+const sideMenuList = reactive<Item[]>([
   {
-    label: "中文 1",
+    label:
+      languageSelect.value === "zh_CN"
+        ? "简体中文"
+        : languageSelect.value === "en_US"
+        ? "English"
+        : "繁体中文",
+    type: "language",
     expanded: false,
+    selectName: languageSelect.value,
     details: [
       {
-        label: "ENG",
+        label: "English",
         selected: false,
+        aName: "en_US",
       },
       {
-        label: "JAN",
+        label: "简体中文",
         selected: false,
+        aName: "zh_CN",
       },
       {
-        label: "ZH",
+        label: "繁体中文",
         selected: false,
+        aName: "zh_TW",
       },
+      // {
+      //   label: "Japan",
+      //   selected: false,
+      //   aName: "ja_JP",
+      // },
     ],
   },
   {
-    label: "中文 2",
+    label: getTranslate("sideMenu.menuInfo.mainMenu") as any,
+    type: "menu",
     expanded: false,
     details: [
       {
-        label: "ENG",
+        label: getTranslate("sideMenu.menuInfo.menu_1") as any,
         selected: false,
       },
       {
-        label: "JAN",
+        label: getTranslate("sideMenu.menuInfo.menu_2") as any,
         selected: false,
       },
       {
-        label: "ZH",
+        label: getTranslate("sideMenu.menuInfo.menu_3") as any,
         selected: false,
-      },
-    ],
-  },
-  {
-    label: "中文 3",
-    expanded: false,
-    details: [
-      {
-        label: "ENG",
-        selected: false,
-      },
-      {
-        label: "JAN",
-        selected: false,
-      },
-      {
-        label: "ZH",
-        selected: false,
-      },
-    ],
-  },
-  {
-    label: "中文 4",
-    expanded: false,
-    details: [
-      {
-        label: "ENG",
-      },
-      {
-        label: "JAN",
-      },
-      {
-        label: "ZH",
       },
     ],
   },
 ]);
 
+// 切换侧边栏
 const showPopup = () => {
-  show.value = !show.value;
-  if (show.value) {
-    items.forEach((item) => {
+  sideMenuVisible.value = !sideMenuVisible.value;
+  if (sideMenuVisible.value) {
+    sideMenuList.forEach((item) => {
       item.expanded = false;
     });
   }
 };
 
+// 切换搜索
 const switchShowSearchBox = () => {
   showSearchBox.value = !showSearchBox.value;
 };
 
-const updateLabel = (item: Item, newLabel: string) => {
+// 切换语言
+const changeLangue = (type: string) => {
+  locale.value = type;
+  sideMenuStore.setLanguageSelect(type);
+};
+
+// 选择菜单
+const selectMenuItem = (item: Item, newLabel: string, inx: number) => {
   item.details.forEach((detail) => {
     // 设置选中的状态
     detail.selected = detail.label === newLabel;
   });
-  // 更新 item.label
-  item.label = newLabel;
+  if (item.type === "language") {
+    // 更新 item.label
+    item.label = newLabel;
+    item.selectName = item.details.find((d) => d.selected)?.aName || "";
+    console.log(item);
+    changeLangue(item.selectName);
+  }
+  // 关闭菜单
+  toggleExpand(inx);
+  sideMenuVisible.value = false;
 };
 
+// 展开菜单
 const toggleExpand = (index: number) => {
-  items[index].expanded = !items[index].expanded;
+  sideMenuList[index].expanded = !sideMenuList[index].expanded;
 };
 
+// 跳转首页
 const linkHome = () => {
   router.push({
     path: "/",
@@ -142,7 +154,7 @@ const linkHome = () => {
           <input
             type="text"
             class="search-input"
-            placeholder="请输入您要搜索的内容"
+            :placeholder="getTranslate('home.searchPlaceholder').value"
           />
           <div class="button">
             <img src="@/assets/big-search.png" alt="" />
@@ -153,14 +165,24 @@ const linkHome = () => {
 
     <div class="top-content">
       <van-popup
-        v-model:show="show"
+        v-model:show="sideMenuVisible"
         position="left"
         :style="{ width: '85%', height: '100%' }"
         class="popup-index"
       >
         <div class="popup-ul">
-          <div class="popup-li" v-for="(item, index) in items" :key="index">
-            <div class="content" @click="toggleExpand(index)">
+          <div
+            class="popup-li"
+            v-for="(item, index) in sideMenuList"
+            :key="index"
+          >
+            <div
+              :class="{
+                select_content: true,
+                language: item.type === 'language',
+              }"
+              @click="toggleExpand(index)"
+            >
               <div>
                 {{ item.label }}
               </div>
@@ -171,11 +193,11 @@ const linkHome = () => {
             </div>
             <!-- 展开内容 -->
             <div class="details" v-if="item.expanded">
-              <div v-for="(i, index) in item.details">
+              <div v-for="(i, inx) in item.details">
                 <div
                   class="details-label"
                   :class="{ selected: i.selected }"
-                  @click="updateLabel(item, i.label)"
+                  @click="selectMenuItem(item, i.label, index)"
                 >
                   {{ i.label }}
                 </div>
@@ -246,9 +268,12 @@ const linkHome = () => {
         color: white;
         font-size: 16px;
         border-top: 1px solid #29252f;
-        .content {
+        .select_content {
           display: flex;
           justify-content: space-between;
+        }
+        .language {
+          color: #f10086;
         }
         .down,
         .up {
@@ -264,6 +289,9 @@ const linkHome = () => {
         font-size: 12px;
         .details-label {
           height: 25px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
         }
         .selected {
           color: #f10086;
@@ -309,11 +337,5 @@ const linkHome = () => {
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active 在 2.1.8+ */ {
   opacity: 0;
-}
-.content {
-  padding: 20px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  margin-top: 10px;
 }
 </style>

@@ -4,12 +4,7 @@ import App from './App.vue'
 import 'lib-flexible'
 import pinia from '@/store/index'
 import router from '@/router/index'
-import { Locale } from 'vant';
-import zhCN from 'vant/es/locale/lang/zh-CN';
-import enUS from 'vant/es/locale/lang/en-US';
-Locale.use('zh-CN', zhCN);
-Locale.use('en-US', enUS);
-// Import default CSS
+import i18n from "@/lang"
 
 const app = createApp(App);
-app.use(pinia).use(router).mount("#app")
+app.use(pinia).use(router).use(i18n).mount("#app")

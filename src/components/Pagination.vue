@@ -1,44 +1,8 @@
-<template>
-  <div class="pagination">
-    <!-- 上一页 -->
-    <button
-      class="pagination-item"
-      :disabled="currentPage === 1"
-      @click="goToPage(currentPage - 1)"
-    >
-      上一页
-    </button>
-
-    <button class="pagination-item" v-if="showLeftEllipsis">...</button>
-
-    <!-- 页码按钮 -->
-    <button
-      v-for="page in visiblePages"
-      :key="page"
-      class="pagination-item"
-      :class="{ active: page === currentPage }"
-      @click="goToPage(page)"
-    >
-      {{ page }}
-    </button>
-
-    <!-- 省略号 -->
-    <button class="pagination-item" v-if="showRightEllipsis">...</button>
-
-    <!-- 下一页 -->
-    <button
-      class="pagination-item"
-      :disabled="currentPage === totalPages"
-      @click="goToPage(currentPage + 1)"
-    >
-      下一页
-    </button>
-  </div>
-</template>
-
 <script setup lang="ts">
+import useTranslate from "@/hooks/TransLateKey";
 import { computed } from "vue";
 
+const { getTranslate } = useTranslate();
 const props = defineProps({
   currentPage: {
     type: Number,
@@ -104,6 +68,43 @@ const goToPage = (page: number): void => {
   }
 };
 </script>
+<template>
+  <div class="pagination">
+    <!-- 上一页 -->
+    <button
+      class="pagination-item"
+      :disabled="currentPage === 1"
+      @click="goToPage(currentPage - 1)"
+    >
+      {{ getTranslate("home.perPage") }}
+    </button>
+
+    <button class="pagination-item" v-if="showLeftEllipsis">...</button>
+
+    <!-- 页码按钮 -->
+    <button
+      v-for="page in visiblePages"
+      :key="page"
+      class="pagination-item"
+      :class="{ active: page === currentPage }"
+      @click="goToPage(page)"
+    >
+      {{ page }}
+    </button>
+
+    <!-- 省略号 -->
+    <button class="pagination-item" v-if="showRightEllipsis">...</button>
+
+    <!-- 下一页 -->
+    <button
+      class="pagination-item"
+      :disabled="currentPage === totalPages"
+      @click="goToPage(currentPage + 1)"
+    >
+      {{ getTranslate("home.nextPage") }}
+    </button>
+  </div>
+</template>
 
 <style scoped>
 .pagination {

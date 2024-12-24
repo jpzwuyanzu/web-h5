@@ -1,54 +1,12 @@
-<template>
-  <div class="layoutContainer">
-    <Top />
-    <div class="testContent">
-      <div class="title">
-        <span style="vertical-align: top">
-          <span @click="linkHome">首页</span> / 视频 /
-        </span>
-        <span style="color: #f10086; vertical-align: middle">视频详情</span>
-      </div>
-      <div class="video">
-        <div id="videoContainer"></div>
-      </div>
-      <div class="box">
-        <div class="title-box">
-          重磅网曝门上海某集团顶级名媛“李思涵”，被曝做性奴吃屌狂操白虎粉穴 A 片
-        </div>
-        <div class="date">2024-12-12</div>
-        <div class="tag">
-          <div v-for="index in 10" :key="index" class="s-tag">输入文本</div>
-        </div>
-        <div class="big-title">相关推荐</div>
-
-        <div class="m-box">
-          <div
-            class="small-box"
-            v-for="(item, index) in 5"
-            :key="index"
-            @click="playItem(item)"
-          >
-            <div class="preImg">
-              <div class="timeLine">2:52:38</div>
-              <div class="timeLine">2:52:38</div>
-            </div>
-            <div class="m-title">
-              チ恋チ粘着ピーピンピチ恋チ粘着ピーピンチ恋チ粘着ピーピンピ
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import Top from "../components/Top.vue";
 import { useRouter } from "vue-router";
 import Player, { PlayerConfig } from "xgplayer"; // 导入 PlayerConfig 类型
 import "xgplayer/dist/index.min.css";
+import useTranslate from "@/hooks/TransLateKey";
 
+const { getTranslate } = useTranslate();
 const router = useRouter();
 const xgPlayerRef = ref<PlayerConfig>(null);
 
@@ -91,6 +49,54 @@ onMounted(() => {
   };
 });
 </script>
+<template>
+  <div class="layoutContainer">
+    <Top />
+    <div class="testContent">
+      <div class="title">
+        <span style="vertical-align: top">
+          <span @click="linkHome">{{
+            getTranslate("routeLinkName.home")
+          }}</span>
+          / {{ getTranslate("routeLinkName.video") }} /
+        </span>
+        <span style="color: #f10086; vertical-align: middle">{{
+          getTranslate("routeLinkName.detail")
+        }}</span>
+      </div>
+      <div class="video">
+        <div id="videoContainer"></div>
+      </div>
+      <div class="box">
+        <div class="title-box">
+          重磅网曝门上海某集团顶级名媛“李思涵”，被曝做性奴吃屌狂操白虎粉穴 A 片
+        </div>
+        <div class="date">2024-12-12</div>
+        <div class="tag">
+          <div v-for="index in 10" :key="index" class="s-tag">输入文本</div>
+        </div>
+        <div class="big-title">相关推荐</div>
+
+        <div class="m-box">
+          <div
+            class="small-box"
+            v-for="(item, index) in 5"
+            :key="index"
+            @click="playItem(item)"
+          >
+            <div class="preImg">
+              <div class="timeLine">2:52:38</div>
+              <div class="timeLine">2:52:38</div>
+            </div>
+            <div class="m-title">
+              チ恋チ粘着ピーピンピチ恋チ粘着ピーピンチ恋チ粘着ピーピンピ
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped lang="less">
 .testContent {
